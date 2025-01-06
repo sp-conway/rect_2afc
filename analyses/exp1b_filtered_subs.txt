@@ -1,0 +1,2 @@
+filtered out 1 subjects based on catch performance
+also filtered out trials with rt <100ms and >10000ms

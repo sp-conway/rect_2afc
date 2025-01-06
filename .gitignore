@@ -1,0 +1,7 @@
+analyses/old
+analyses/old_for_mpt
+*.docx
+*.DS_Store
+exp1a/experiment_code
+exp1b/experiment_code
+.Rproj.user

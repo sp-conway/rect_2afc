@@ -1,0 +1,5 @@
+note
+====
+exp1b subject numbers are a little goofy because of RA confusion when we changed over experiments
+but each subject IS uniquely identified
+also, data key is the same as exp1a

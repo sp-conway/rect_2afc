@@ -1,0 +1,43 @@
+rect exp 1a & exp 1b data key
+note that critical trial specific data will be NA on catch trials
+and that catch trial specific data will be NA on critical trials
+
+The data file for exp1a has "FIXEDSPEKTOR" in the title because on the Spektor (triangle) trials, the height and width of the competitor and target rectangle trials were initially flipped around in the data. That is, the W rectangles were classified as H, and vice versa. This has been fixed in the updated file (on which all analyses are based). 
+===================
+sub_n: subject number
+trial_number: trial number
+trial: critical (attraction/repulsion test) or catch
+r1: identity of first rectangle on screen
+r2: identity of second rectangle on screen
+r3: identity of third rectangle on screen
+w1: width of first rectangle (in pixels)
+h1: height of first rectangle (in pixels)
+w2: width of second rectangle (in pixels)
+h2: height of second rectangle (in pixels)
+w3: width of third rectangle (in pixels)
+h3: height of third rectangle (in pixels)
+display: rectangle arrangement. either spektor (triangle) or trueblood (horizontal)
+tdd: target-decoy distance. proportion difference in area between t/d
+tdo: target-decoy orientation: h (t/d taller than wide) or w (t/d wider than tall)
+tw: target width
+th: target height
+cw: competitor width
+ch: competitor height
+dw: decoy width
+dh: decoy height
+ta: target area in pixels
+ca: competitor area in pixels
+da: decoy area in pixels
+probe: which rectangles participants were asked about
+csls: catch small large side (small rectangle, larger side length in pixels)
+csss: catch small small side (small rectangle, smaller side length in pixels)
+clls: catch large large side (large rectangle, larger side length in pixels)
+clss: catch large small side (large rectangle, smaller side length in pixels)
+sa: catch trial, small rectangle area in pixels
+la: catch trial, large rectangle area in pixels
+probe_rects: which stimuli probed (e.g., [1,2] means rects 1 and 2 were probed)
+rt: response time in msec
+response: which keyboard response (1,2,or 3)
+choice: rectangle chosen.
+  - critical trials: t=target, d=decoy,c=competitor
+  - catch trials: sw=small wide, sh=small height, l=large
