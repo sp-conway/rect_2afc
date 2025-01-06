@@ -181,6 +181,8 @@ if(!file_exists(fit_file)){
   load(fit_file)
 }
 
+# check modeling ===============================================================================
+m_1b_intxn_fit <- as.matrix(m_1b_intxn)
 
 # m_1a_intxn <- stan_glmer(discrim~tdd*probe+display+tdo+(1|sub_n),
 #                          family=binomial,
