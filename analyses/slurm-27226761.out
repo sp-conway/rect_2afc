@@ -1,0 +1,13 @@
+Lmod has detected the following error: The following module(s) are unknown:
+"r-rocker-ml-verse/4.4.2+apptainer"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "r-rocker-ml-verse/4.4.2+apptainer"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+/var/spool/slurm/slurmd/job27226761/slurm_script: line 10: Rscript: command not found

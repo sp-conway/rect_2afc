@@ -129,6 +129,8 @@ if(!file_exists(fit_file)){
                            cores=n_core,
                            iter=n_iter)
   save(m,file=fit_file)
+  m_summary <- summary(m, probs = c(.025,.975))
+  save(m_summary,file=here("analyses","stats","m_summary.RData"))
 }else{
   load(fit_file)
 }
@@ -168,7 +170,14 @@ ggsave(filename=here("analyses","stats",glue("{prefix}_displayhorizontal_hist.jp
 mcmc_hist(m, c("tdd0.05:probetd","tdd0.09:probetd","tdd0.14:probetd"))
 ggsave(filename=here("analyses","stats",glue("{prefix}_tddXprobe_hist.jpeg")),width=5,height=4)
 
-# critical tc trials ====================================================================================
+# ppc =====================================================================================================================
+mppc <- posterior_predict(m)
+
+ppc_dens_overlay(critical_1$discrim,mppc)
+
+
+
+# critical tc trials =================================================================================================================================
 critical_tc_means <- critical %>%
   filter(probe=="tc") %>%
   mutate(choose_t=choice=="t") %>%
@@ -200,4 +209,3 @@ critical_tc_means %>%
         legend.position = "inside",
         legend.position.inside = c(.1,.85))
 ggsave(filename=here("analyses","plots","tc_choices.jpeg"),width=5,height=6)
-
