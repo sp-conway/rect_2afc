@@ -2,6 +2,7 @@
 rm(list=ls())
 library(tidyverse)
 library(mvtnorm)
+library(here)
 
 # control params
 N <- 50000
@@ -48,16 +49,19 @@ for(i in 1:length(which_choice)){
 tibble(
   p=as.vector(p),
   tdd=c(2,2,5,5,9,9,14,14),
-  probe=c("td","dc","td","dc","td","dc","td","dc")
+  probe=c("td","cd","td","cd","td","cd","td","cd")
 ) %>%
-  ggplot(aes(tdd, p,col=probe))+
+  ggplot(aes(tdd, p,col=probe,shape=probe))+
   geom_point()+
   geom_line()+
   scale_x_continuous(breaks=c(2,5,9,14))+
   scale_y_continuous(limits=c(.5,.8))+
-  ggsci::scale_color_startrek(name="choice")+
-  labs(x="target-decoy distance",y="proability discriminate",title="model simulations")+
+  scale_color_manual(values=c("gray","black"),name="pair")+
+  scale_shape_manual(values=c(17,15),name="pair")+
+  labs(x="tdd",y="p(discriminate)")+
   ggthemes::theme_few()+
   theme(text=element_text(size=18),
-        plot.title=element_text(hjust=0.5))
+        plot.title=element_text(hjust=0.5),
+        legend.position="inside",
+        legend.position.inside = c(.8,.2))
 ggsave(filename=here("analyses","plots","model_sim_2afc.jpeg"),width=4,height=4)

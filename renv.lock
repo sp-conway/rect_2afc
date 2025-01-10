@@ -44,13 +44,6 @@
       ],
       "Hash": "64ff3427f559ce3f2597a4fe13255cb6"
     },
-    "HDInterval": {
-      "Package": "HDInterval",
-      "Version": "0.2.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "b5b77433b286dd869ff33ee7fd5c545f"
-    },
     "MASS": {
       "Package": "MASS",
       "Version": "7.3-60.2",

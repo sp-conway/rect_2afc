@@ -1,6 +1,5 @@
 # exp1a_1b_analysis.R
 # Sean Conway
-# last modified Oct. 2024
 
 # setup ==============================================================
 rm(list=ls())
@@ -104,7 +103,7 @@ critical_agg_choice_display_tdd <- critical %>%
   filter(choice==probe1 | choice==probe2) %>%
   ungroup()
 
-# stats ===============================================================
+# critical trial analysis =============================================================================================================
 # baseline display level should be triangle for model
 critical_1 <- critical %>%
   filter(tdd!=0 & probe!="tc") %>%
@@ -183,19 +182,44 @@ if(!file_exists(fit_file)){
 
 # check modeling ===============================================================================
 m_1b_intxn_fit <- as.matrix(m_1b_intxn)
+color_scheme_set("red")
+prefix <- "m1b_intxn"
 
-# m_1a_intxn <- stan_glmer(discrim~tdd*probe+display+tdo+(1|sub_n),
-#                          family=binomial,
-#                          data=critical_1a,
-#                          cores=n_core,
-#                          iter=n_iter)
-# summary(m_1a_intxn,probs = c(.025, .975))
+mcmc_trace(m_1b_intxn, c("tdd0.05","tdd0.09","tdd0.14"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_tdd_trace.jpeg")),width=5,height=4)
 
+mcmc_trace(m_1b_intxn, c("probetd"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_probetd_trace.jpeg")),width=5,height=4)
 
-# m_1a_intxn_fit <- as.matrix(m_1a_intxn)
-# save(m_1a_intxn, m_1b_intxn,
-#      m_1a, m_1b, file=here("tmp.RData"))
+mcmc_trace(m_1b_intxn, c("(Intercept)"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_fixed_int_trace.jpeg")),width=5,height=4)
 
+mcmc_trace(m_1b_intxn, c("displayhorizontal"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_displayhorizontal_trace.jpeg")),width=5,height=4)
+
+mcmc_trace(m_1b_intxn, c("tdd0.05:probetd","tdd0.09:probetd","tdd0.14:probetd"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_tddXprobe_trace.jpeg")),width=5,height=4)
+
+mcmc_hist(m_1b_intxn, c("tdd0.05","tdd0.09","tdd0.14"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_tdd_hist.jpeg")),width=5,height=4)
+
+mcmc_hist(m_1b_intxn, c("probetd"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_probetd_hist.jpeg")),width=5,height=4)
+
+mcmc_hist(m_1b_intxn, c("(Intercept)"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_fixed_int_hist.jpeg")),width=5,height=4)
+
+mcmc_hist(m_1b_intxn, c("displayhorizontal"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_displayhorizontal_hist.jpeg")),width=5,height=4)
+
+mcmc_hist(m_1b_intxn, c("tdd0.05:probetd","tdd0.09:probetd","tdd0.14:probetd"))
+ggsave(filename=here("analyses","stats",glue("{prefix}_tddXprobe_hist.jpeg")),width=5,height=4)
+
+x=m_1b_intxn %>% 
+  as_tibble() %>%
+  pivot_longer(contains("sub_n")) %>%
+  mutate(sub_n=str_extract(name,"(?<=sub_n:)[:digit:]{1,100}")) %>%
+  select(-name) %>% 
 # critical tc trials ====================================================================================
 critical_tc_means <- critical %>%
   filter(probe=="tc") %>%
@@ -249,3 +273,16 @@ ggsave(filename=here("analyses","plots","tc_choices.jpeg"),width=5,height=6)
 # }
 # comp_means(bind_rows(critical_td_1a,critical_td_1b),
 #            here("analyses","output"))
+
+# m_1a_intxn <- stan_glmer(discrim~tdd*probe+display+tdo+(1|sub_n),
+#                          family=binomial,
+#                          data=critical_1a,
+#                          cores=n_core,
+#                          iter=n_iter)
+# MORE OLD
+# summary(m_1a_intxn,probs = c(.025, .975))
+
+
+# m_1a_intxn_fit <- as.matrix(m_1a_intxn)
+# save(m_1a_intxn, m_1b_intxn,
+#      m_1a, m_1b, file=here("tmp.RData"))
