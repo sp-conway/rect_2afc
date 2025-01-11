@@ -2,14 +2,14 @@ data {
   int<lower=0> n_subs; // number of subjects
   int<lower=0> n_trials; // number of TOTAL trials across all subjects
   int<lower=0> n_trials_unique;
-  array[n_trials] int sub_n_new;  // vector of all subject ids for indexing of random effects
+  int[n_trials] sub_n_new;  // vector of all subject ids for indexing of random effects
   vector[n_trials] tdo; // target-decoy orientation. 1=w, 0=h
   vector[n_trials] display; // display. 1=horizontal, 0=triangle
   vector[n_trials] probe; // probe. 1=target-decoy, 0=competitor-decoy
   vector[n_trials] tdd_5; // dummy variable for target-decoy distance=5
   vector[n_trials] tdd_9; // dummy variable for target-decoy distance=9
-  vector[n_trials] tdd_14; // dummy variable for target-decoy distance=5
-  array[n_trials] int discrim; // whether participant discriminates, i.e., does not choose decoy
+  vector[n_trials] tdd_14; // dummy variable for target-decoy distance=14
+  int[n_trials] discrim; // whether participant discriminates, i.e., does not choose decoy
   
   // unique trials for prediction
   array[n_trials_unique] int sub_n_new_unique;  // vector of all subject ids for indexing of random effects
@@ -106,30 +106,17 @@ parameters {
   
 }
 
-// transformed parameters {
-//   real sigma_b_0_s = exp(log_sigma_b_0_s);
-//   real sigma_b_w_s = exp(log_sigma_b_w_s);
-//   real sigma_b_h_s = exp(log_sigma_b_h_s);
-//   real sigma_b_td_s = exp(log_sigma_b_td_s);
-//   real sigma_b_tdd_5_s = exp(log_sigma_b_tdd_5_s);
-//   real sigma_b_tdd_9_s = exp(log_sigma_b_tdd_9_s);
-//   real sigma_b_tdd_14_s = exp(log_sigma_b_tdd_14_s);
-//   real sigma_b_tdd_5_X_td_s = exp(log_sigma_b_tdd_5_X_td_s);
-//   real sigma_b_tdd_9_X_td_s = exp(log_sigma_b_tdd_9_X_td_s);
-//   real sigma_b_tdd_14_X_td_s = exp(log_sigma_b_tdd_14_X_td_s);
-// }
-
 model {
-  b_0 ~ normal(0,5);
-  b_w ~ normal(0,5);
-  b_h ~ normal(0,5);
-  b_td ~ normal(0,5);
-  b_tdd_5 ~ normal(0,5);
-  b_tdd_9 ~ normal(0,5);
-  b_tdd_14 ~ normal(0,5);
-  b_tdd_5_X_td ~ normal(0,5);
-  b_tdd_9_X_td ~ normal(0,5);
-  b_tdd_14_X_td~ normal(0,5);
+  b_0 ~ normal(0,2.5);
+  b_w ~ normal(0,2.5);
+  b_h ~ normal(0,2.5);
+  b_td ~ normal(0,2.5);
+  b_tdd_5 ~ normal(0,2.5);
+  b_tdd_9 ~ normal(0,2.5);
+  b_tdd_14 ~ normal(0,2.5);
+  b_tdd_5_X_td ~ normal(0,2.5);
+  b_tdd_9_X_td ~ normal(0,2.5);
+  b_tdd_14_X_td~ normal(0,2.5);
   
   // random effects
   sigma_b_0_s ~ cauchy(0,2.5);
