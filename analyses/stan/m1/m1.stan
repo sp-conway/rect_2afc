@@ -2,14 +2,14 @@ data {
   int<lower=0> n_subs; // number of subjects
   int<lower=0> n_trials; // number of TOTAL trials across all subjects
   int<lower=0> n_trials_unique;
-  int[n_trials] sub_n_new;  // vector of all subject ids for indexing of random effects
+  array[n_trials] int sub_n_new;  // vector of all subject ids for indexing of random effects
   vector[n_trials] tdo; // target-decoy orientation. 1=w, 0=h
   vector[n_trials] display; // display. 1=horizontal, 0=triangle
   vector[n_trials] probe; // probe. 1=target-decoy, 0=competitor-decoy
   vector[n_trials] tdd_5; // dummy variable for target-decoy distance=5
   vector[n_trials] tdd_9; // dummy variable for target-decoy distance=9
   vector[n_trials] tdd_14; // dummy variable for target-decoy distance=14
-  int[n_trials] discrim; // whether participant discriminates, i.e., does not choose decoy
+  array[n_trials] int discrim; // whether participant discriminates, i.e., does not choose decoy
   
   // unique trials for prediction
   array[n_trials_unique] int sub_n_new_unique;  // vector of all subject ids for indexing of random effects
@@ -22,6 +22,7 @@ data {
 }
 
 parameters {
+  // fixed effects
   // fixed intercept
   real b_0;
   
@@ -34,20 +35,14 @@ parameters {
   // fixed effect of td comparison
   real b_td;
   
-  // fixed effect of distance=5
+  // fixed effect(s) of TDD
   real b_tdd_5;
-  
-  // fixed effect of distance=9
   real b_tdd_9;
-  
-  // fixed effect of distance=14
   real b_tdd_14;
   
   // fixed interaction(s) between tdd and probe
   real b_tdd_5_X_td;
-  
   real b_tdd_9_X_td;
-  
   real b_tdd_14_X_td;
   
   // random subject-level intercepts
@@ -73,40 +68,31 @@ parameters {
   
   // Std. Dev. of random effect of horizontal target-decoy probe
   real<lower=0> sigma_b_td_s;
-  
+
   // random effect of distance=5
   vector[n_subs] b_tdd_5_s;
-  
-  // Std. Dev. of random effect of tdd=5
-  real<lower=0> sigma_b_tdd_5_s;
   
   // random effect of distance=9
   vector[n_subs] b_tdd_9_s;
   
-  // Std. Dev. of random effect of tdd=9
-  real<lower=0> sigma_b_tdd_9_s;  
-  
   // random effect of distance=14
   vector[n_subs] b_tdd_14_s;
-
-  // Std. Dev. of random effect of tdd=14
-  real<lower=0> sigma_b_tdd_14_s;  
   
+  // Std. Dev. of random effect of tdd=5
+  real<lower=0> sigma_b_tdd_s;
+
   // random interaction(s) between tdd and probe
   vector[n_subs] b_tdd_5_X_td_s;
-  
   vector[n_subs] b_tdd_9_X_td_s;
-  
   vector[n_subs] b_tdd_14_X_td_s;
   
   // Std. Devs. of random effect of intxns
-  real<lower=0> sigma_b_tdd_5_X_td_s;
-  real<lower=0> sigma_b_tdd_9_X_td_s;
-  real<lower=0> sigma_b_tdd_14_X_td_s;
+  real<lower=0> sigma_b_tdd_X_td_s;
   
 }
 
 model {
+  // fixed effects
   b_0 ~ normal(0,2.5);
   b_w ~ normal(0,2.5);
   b_h ~ normal(0,2.5);
@@ -118,42 +104,26 @@ model {
   b_tdd_9_X_td ~ normal(0,2.5);
   b_tdd_14_X_td~ normal(0,2.5);
   
-  // random effects
+  // random effects - standard deviations
   sigma_b_0_s ~ cauchy(0,2.5);
-  b_0_s ~ normal(0,sigma_b_0_s);
-  
-  // random effect of wide
   sigma_b_w_s ~ cauchy(0,2.5);
-  b_w_s ~ normal(0,sigma_b_w_s);
-  
-  // random effect of td comparison
   sigma_b_td_s ~ cauchy(0,2.5);
+  sigma_b_tdd_s ~ cauchy(0,2.5);
+  sigma_b_tdd_X_td_s ~ cauchy(0,2.5);
+  sigma_b_h_s ~ cauchy(0,2.5);
+  
+  // random effects - coefficients
+  b_0_s ~ normal(0,sigma_b_0_s);
+  b_w_s ~ normal(0,sigma_b_w_s);
   b_td_s ~ normal(0,sigma_b_td_s);
-  
-  // random effect of tdd=5
-  sigma_b_tdd_5_s ~ cauchy(0,2.5);
-  b_tdd_5_s ~ normal(0,sigma_b_tdd_5_s);
+  b_h_s ~ normal(0,sigma_b_h_s);
+  b_tdd_5_s ~ normal(0,sigma_b_tdd_s);
+  b_tdd_9_s ~ normal(0,sigma_b_tdd_s);
+  b_tdd_14_s ~ normal(0,sigma_b_tdd_s);
+  b_tdd_5_X_td_s ~ normal(0,sigma_b_tdd_X_td_s);
+  b_tdd_9_X_td_s ~ normal(0,sigma_b_tdd_X_td_s);
+  b_tdd_14_X_td_s ~ normal(0,sigma_b_tdd_X_td_s);
 
-  // random effect of tdd=9
-  sigma_b_tdd_9_s ~ cauchy(0,2.5);
-  b_tdd_9_s ~ normal(0,sigma_b_tdd_9_s);
-
-  // random effect of tdd=14
-  sigma_b_tdd_14_s ~ cauchy(0,2.5);
-  b_tdd_14_s ~ normal(0,sigma_b_tdd_14_s);
-  
-  // random effect of tdd=5 X td interaction
-  sigma_b_tdd_5_X_td_s ~ cauchy(0,2.5);
-  b_tdd_5_X_td_s ~ normal(0,sigma_b_tdd_5_X_td_s);
-  
-  // random effect of tdd=9 X td interaction
-  sigma_b_tdd_9_X_td_s ~ cauchy(0,2.5);
-  b_tdd_9_X_td_s ~ normal(0,sigma_b_tdd_9_X_td_s);
-  
-  // random effect of tdd=14 X td interaction
-  sigma_b_tdd_14_X_td_s ~ cauchy(0,2.5);
-  b_tdd_14_X_td_s ~ normal(0,sigma_b_tdd_14_X_td_s);
-  
   for(i in 1:n_trials) {
     discrim[i] ~ bernoulli_logit( 
       (b_0 + b_0_s[sub_n_new[i]]) +  // intercept

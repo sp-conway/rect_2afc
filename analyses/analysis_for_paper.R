@@ -10,11 +10,13 @@ library(posterior)
 library(bayesplot)
 library(here)
 library(patchwork)
+options(digits=5)
 
 read_dat <- function(f){
   dd <- read_csv(f) %>%
     mutate(display=recode(display, spektor="triangle", trueblood="horizontal"),
-           across(c(sub_n,tdo,display,choice),as.factor))
+           across(c(sub_n,tdo,display,choice),as.factor),
+           display=fct_relevel(display,c("triangle","horizontal")))
   return(dd)
 }
 
@@ -43,6 +45,33 @@ catch <- d %>%
 critical <- d %>%
   filter(trial=="critical")
 
+# checking props on all critical trials ========================================================================================
+critical_mean_props_all <- critical %>%
+  mutate(tdd=as.factor(tdd),
+         probe=as.factor(probe)) %>%
+  group_by(sub_n,tdd,probe,choice) %>%
+  summarise(N=n()) %>%
+  group_by(sub_n,tdd,probe) %>%
+  mutate(prop=N/sum(N)) %>%
+  ungroup() %>%
+  group_by(tdd,probe,choice) %>%
+  summarise(m=mean(prop),
+            s=sd(prop),
+            N=n(),
+            se=s/sqrt(N),
+            ci_lower=m-qt(.975,n()-1)*se,
+            ci_upper=m+qt(.975,n()-1)*se) %>%
+  ungroup() 
+critical_mean_props_all
+
+critical_mean_props_all %>%
+  ggplot(aes(tdd,m,col=choice,group=choice))+
+  geom_point()+
+  geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper),width=.2)+
+  geom_line()+
+  scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.2))+
+  facet_grid(probe~.)+
+  ggthemes::theme_few()
 # critical TD trial analyses ========================================================================================
 # baseline display level should be triangle for model
 critical_1 <- critical %>%
@@ -129,7 +158,7 @@ stan_data <- list(
 )
 
 # controls
-debug_model <- T
+debug_model <- F
 prefix <- "m1"
 model_dir <- path(here("analyses","stan",prefix))
 stan_model_code <- path(model_dir,glue("{prefix}.stan"))
@@ -144,10 +173,9 @@ if(debug_model){
   to_save <- F
 }else{
   # number of iterations for each model per core (for MCMC)
-  n_iter <- 4000
-  n_core <- n_chain <- 4
-  n_warm <- 500
-  to_save <- T
+  n_iter <- 6000
+  n_chain <- 4
+  n_core <- 20
 }
 
 if(!file_exists(fit_file) | debug_model){
@@ -155,7 +183,7 @@ if(!file_exists(fit_file) | debug_model){
   fit <- sampling(model_compiled,
                   data=stan_data,
                   chains=n_chain,
-                  warmup=n_warm,
+                  cores=n_core,
                   iter=n_iter)
   if(!debug_model) save(fit,file=fit_file)
   fit_summary <- summary(fit,probs=c(.025,.975))
@@ -167,183 +195,183 @@ if(!file_exists(fit_file) | debug_model){
 }
 
 # check modeling ===============================================================================
-m_fit <- as.matrix(fit)
+# m_fit <- as.matrix(fit)
 color_scheme_set("red")
 
 try({
-  mcmc_trace(m_fit, c("lp__"))
+  mcmc_trace(fit,c("lp__"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_lp___trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_0"))
+  mcmc_trace(fit,c("b_0"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_0_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_tdd_5","b_tdd_9","b_tdd_14"))
+  mcmc_trace(fit,c("b_tdd_5","b_tdd_9","b_tdd_14"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_td"))
+  mcmc_trace(fit,c("b_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_td_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_w"))
+  mcmc_trace(fit,c("b_w"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_w_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_h"))
+  mcmc_trace(fit,c("b_h"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_h_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  mcmc_trace(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_trace(m_fit, c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_5_s","sigma_b_tdd_9_s","sigma_b_tdd_14_s","sigma_b_tdd_5_X_td_s","sigma_b_tdd_9_X_td_s","sigma_b_tdd_14_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_trace.jpeg")),width=5,height=4)
+  mcmc_trace(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_trace.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("lp__"))
+  mcmc_hist(fit,c("lp__"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_lp___hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_0"))
+  mcmc_hist(fit,c("b_0"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_0_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_tdd_5","b_tdd_9","b_tdd_14"))
+  mcmc_hist(fit,c("b_tdd_5","b_tdd_9","b_tdd_14"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_td"))
+  mcmc_hist(fit,c("b_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_td_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_w"))
+  mcmc_hist(fit,c("b_w"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_w_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_h"))
+  mcmc_hist(fit,c("b_h"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_h_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_hist(m_fit, c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  mcmc_hist(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_hist.jpeg")),width=5,height=4)
 })
 
 
 try({
-  mcmc_hist(m_fit, c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_5_s","sigma_b_tdd_9_s","sigma_b_tdd_14_s","sigma_b_tdd_5_X_td_s","sigma_b_tdd_9_X_td_s","sigma_b_tdd_14_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_hist.jpeg")),width=5,height=4)
+  mcmc_hist(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_hist.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("lp__"))
+  mcmc_dens(fit,c("lp__"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_lp___dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_0"))
+  mcmc_dens(fit,c("b_0"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_0_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_tdd_5","b_tdd_9","b_tdd_14"))
+  mcmc_dens(fit,c("b_tdd_5","b_tdd_9","b_tdd_14"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_td"))
+  mcmc_dens(fit,c("b_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_td_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_w"))
+  mcmc_dens(fit,c("b_w"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_w_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_h"))
+  mcmc_dens(fit,c("b_h"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_h_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  mcmc_dens(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_dens.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens(m_fit, c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_5_s","sigma_b_tdd_9_s","sigma_b_tdd_14_s","sigma_b_tdd_5_X_td_s","sigma_b_tdd_9_X_td_s","sigma_b_tdd_14_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_dens.jpeg")),width=5,height=4)
+  mcmc_dens(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_dens.jpeg")),width=5,height=4)
 })
 
 
 try({
-  mcmc_dens_chains(m_fit, c("lp__"))
+  mcmc_dens_chains(fit,c("lp__"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_lp___dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_0"))
+  mcmc_dens_chains(fit,c("b_0"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_0_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_tdd_5","b_tdd_9","b_tdd_14"))
+  mcmc_dens_chains(fit,c("b_tdd_5","b_tdd_9","b_tdd_14"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_td"))
+  mcmc_dens_chains(fit,c("b_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_td_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_w"))
+  mcmc_dens_chains(fit,c("b_w"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_w_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_h"))
+  mcmc_dens_chains(fit,c("b_h"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_h_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  mcmc_dens_chains(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_dens_chains(m_fit, c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_5_s","sigma_b_tdd_9_s","sigma_b_tdd_14_s","sigma_b_tdd_5_X_td_s","sigma_b_tdd_9_X_td_s","sigma_b_tdd_14_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_dens_chains.jpeg")),width=5,height=4)
+  mcmc_dens_chains(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_dens_chains.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_pairs(m_fit, c("b_tdd_5","b_tdd_9","b_tdd_14"))
+  mcmc_pairs(fit,c("b_tdd_5","b_tdd_9","b_tdd_14"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_pairs.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_pairs(m_fit, c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_5_s","sigma_b_tdd_9_s","sigma_b_tdd_14_s","sigma_b_tdd_5_X_td_s","sigma_b_tdd_9_X_td_s","sigma_b_tdd_14_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_pairs.jpeg")),width=5,height=4)
+  mcmc_pairs(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_pairs.jpeg")),width=5,height=4)
 })
 
 try({
-  mcmc_pairs(m_fit, c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  mcmc_pairs(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_pair.jpeg")),width=5,height=4)
 })
 
@@ -435,7 +463,7 @@ try({
 
 # get model predictions ================================================================================================================================================
 p <- extract(fit, pars="p")$p
-if(!debug) save(file=path(model_dir,glue("{prefix}_p.RData")))
+if(!debug_model) save(p,file=path(model_dir,glue("{prefix}_p.RData")))
 # tc trials =================================================================================================================================
 critical_tc_means <- critical %>%
   filter(probe=="tc") %>%
