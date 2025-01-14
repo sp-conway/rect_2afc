@@ -5,3 +5,5 @@ analyses/old_for_mpt
 exp1a/experiment_code
 exp1b/experiment_code
 .Rproj.user
+*fit.RData
+*_p.RData

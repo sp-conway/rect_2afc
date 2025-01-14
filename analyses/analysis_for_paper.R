@@ -175,7 +175,7 @@ if(debug_model){
   # number of iterations for each model per core (for MCMC)
   n_iter <- 6000
   n_chain <- 4
-  n_core <- 20
+  n_core <- 10
 }
 
 if(!file_exists(fit_file) | debug_model){
