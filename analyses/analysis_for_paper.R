@@ -366,8 +366,9 @@ try({
 })
 
 try({
-  mcmc_pairs(fit,pars = c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14","b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_pairs_fixed.jpeg")),width=10,height=10)
+  p <- mcmc_pairs(fit,pars = c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14","b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))+
+    off_diag_args = list(size = .5, alpha = 0.5)
+  ggsave(p,filename=path(model_dir,glue("{prefix}_b_pairs_fixed.jpeg")),width=10,height=10)
 })
 
 try({
