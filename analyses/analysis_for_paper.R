@@ -235,7 +235,7 @@ try({
 
 try({
   mcmc_trace(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_trace.jpeg")),width=5,height=4)
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_trace.jpeg")),width=6,height=5)
 })
 
 try({
@@ -366,13 +366,13 @@ try({
 })
 
 try({
-  mcmc_pairs(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_pairs.jpeg")),width=5,height=4)
+  mcmc_pairs(fit,pars = c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14","b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_pairs_fixed.jpeg")),width=10,height=10)
 })
 
 try({
-  mcmc_pairs(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
-  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_b_tdd_X_td_pair.jpeg")),width=5,height=4)
+  mcmc_pairs(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  if(!debug_model) ggsave(filename=path(model_dir,glue("{prefix}_sigma_pairs.jpeg")),width=10,height=10)
 })
 
 try({
