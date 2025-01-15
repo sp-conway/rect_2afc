@@ -159,7 +159,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F
-prefix <- "m1"
+prefix <- "m2"
 model_dir <- path(here("analyses","stan",prefix))
 stan_model_code <- path(model_dir,glue("{prefix}.stan"))
 fit_file <- path(model_dir,glue("{prefix}_fit.RData"))
