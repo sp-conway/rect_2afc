@@ -108,8 +108,8 @@ model {
   sigma_b_0_s ~ cauchy(0,1);
   sigma_b_w_s ~ cauchy(0,1);
   sigma_b_td_s ~ cauchy(0,1);
-  sigma_b_tdd_s ~ cauchy(0,.5);
-  sigma_b_tdd_X_td_s ~ cauchy(0,.5);
+  sigma_b_tdd_s ~ cauchy(0,.25);
+  sigma_b_tdd_X_td_s ~ cauchy(0,.25);
   sigma_b_h_s ~ cauchy(0,1);
   
   // random effects - coefficients

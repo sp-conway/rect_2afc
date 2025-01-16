@@ -6,5 +6,5 @@
 #SBATCH -t 18:00:00  # Job time limit
 #SBATCH --mail-type=BEGIN
 #SBATCH --mail-type=END
-module load r-rocker-ml-verse/4.4.2+apptainer
-Rscript analysis_for_paper.R
+module load r-rocker-ml-verse/4.4.0+apptainer
+Rscript analyses/analysis_for_paper.R
