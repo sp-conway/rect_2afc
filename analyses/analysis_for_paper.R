@@ -159,7 +159,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F
-prefix <- "m4"
+prefix <- "m6"
 model_dir <- path(here("analyses","stan",prefix))
 stan_model_code <- path(model_dir,glue("{prefix}.stan"))
 fit_file <- path(model_dir,glue("{prefix}_fit.RData"))
@@ -241,7 +241,7 @@ try({
 })
 
 try({
-  p <- mcmc_trace(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  p <- mcmc_trace(fit,c("sigma_b_0_s","sigma_b_s"))
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_sigma_trace.jpeg")),width=7,height=6)
   rm(p)
 })
@@ -290,7 +290,7 @@ try({
 
 
 try({
-  p <- mcmc_hist(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  p <- mcmc_hist(fit,c("sigma_b_0_s","sigma_b_s"))
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_sigma_hist.jpeg")),width=5,height=4)
   rm(p)
 })
@@ -338,7 +338,7 @@ try({
 })
 
 try({
-  p <- mcmc_dens(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  p <- mcmc_dens(fit,c("sigma_b_0_s","sigma_b_s"))
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_sigma_dens.jpeg")),width=5,height=4)
   rm(p)
 })
@@ -387,7 +387,7 @@ try({
 })
 
 try({
-  p <- mcmc_dens_chains(fit,c("sigma_b_0_s","sigma_b_w_s","sigma_b_h_s","sigma_b_td_s","sigma_b_tdd_s","sigma_b_tdd_X_td_s"))
+  p <- mcmc_dens_chains(fit,c("sigma_b_0_s","sigma_b_s"))
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_sigma_dens_chains.jpeg")),width=5,height=4)
   rm(p)
 })
@@ -526,6 +526,68 @@ try({
 # get model predictions ================================================================================================================================================
 p <- extract(fit, pars="p")$p
 if(!debug_model) save(p,file=path(model_dir,glue("{prefix}_p.RData")))
+
+pd <- as.data.frame(t(p))
+colnames(pd) <- paste0("iter_",1:ncol(pd))
+pdd <- bind_cols(critical_unique,pd) %>%
+  pivot_longer(cols=contains("iter"),values_to = "p",names_to = "iter") %>%
+  mutate(tdd=case_when(
+    tdd_5==1~5,
+    tdd_9==1~9,
+    tdd_14==1~14,
+    T~2
+  ),
+  tdo=case_when(
+    tdo==1~"w",
+    tdo==0~"h"
+  ),
+  display=case_when(
+    display==1~"horizontal",
+    display==0~"triangle"
+  ),
+  probe=case_when(
+    probe==1~"td",
+    probe==0~"dc"
+  )) %>%
+  group_by(iter,display,probe,tdd) %>%
+  summarise(mp=mean(p)) %>%
+  group_by(display,probe,tdd) %>%
+  summarise(p=mean(mp),
+            hdi_lower=hdi(mp)[,1],
+            hdi_upper=hdi(mp)[,2]) %>%
+  ungroup() %>%
+  mutate(source="model")
+
+pddd <- critical_1 %>%
+  mutate(tdd=as.numeric(as.character(tdd))*100) %>%
+  group_by(sub_n,display,probe,tdd) %>%
+  summarise(p=mean(discrim)) %>%
+  group_by(display,probe,tdd) %>%
+  summarise(p=mean(p)) %>%
+  ungroup() %>%
+  mutate(source="data") %>%
+  bind_rows(pdd)
+head(pddd)
+p <- pddd %>%
+  ggplot(aes(tdd,p,shape=source,col=probe))+
+  geom_point(alpha=.65,size=2.5)+
+  geom_line(data = filter(pddd, source == "data"), aes(tdd, p, group = probe), alpha = 0.8) +  
+  geom_errorbar(aes(ymin=hdi_lower,ymax=hdi_upper),width=.25,alpha=.5,col="black")+
+  scale_x_continuous(breaks=c(2,5,9,14),limits=c(1.5,14.5),labels=c("2%","5%","9%","14%"))+
+  scale_y_continuous(limits=c(.5,1))+
+  ggsci::scale_color_startrek(name="comparison")+
+  scale_shape_manual(values=c(1,4))+
+  # scale_color_manual(values=c("grey","black"))+
+  labs(x="target-decoy distance",y="p(discriminate)")+
+  facet_grid(display~.)+
+  ggthemes::theme_few()+
+  theme(text=element_text(size=18))
+p
+ggsave(p,filename=path(model_dir,glue("{prefix}_model_preds_v_data.jpeg")),
+       width=5,height=4,dpi=500)
+  #       plot.title=element_text(hjust=0.5),
+  #       legend.position = "inside",
+  #       legend.position.inside = c(.1,.85))
 
 # check random effect constraints ================================================================================================================================================
 b_0_s <- extract(fit,pars="b_0_s")$b_0_s
