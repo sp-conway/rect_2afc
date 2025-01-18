@@ -64,6 +64,7 @@ critical_mean_props_all <- critical %>%
   ungroup() 
 critical_mean_props_all
 
+# critical props on all trial types, all tdd value
 critical_mean_props_all %>%
   ggplot(aes(tdd,m,col=choice,group=choice))+
   geom_point()+
@@ -72,20 +73,29 @@ critical_mean_props_all %>%
   scale_y_continuous(limits=c(0,1),breaks=seq(0,1,.2))+
   facet_grid(probe~.)+
   ggthemes::theme_few()
-# critical TD trial analyses ========================================================================================
+ggsave(filename=here("analyses","plots","crit_props_all.jpeg"),width=4,height=6)
+
+# critical trial analyses - td and cd ========================================================================================
+# NOTE THAT IN THE PAPER WE LABEL COMPETITOR-DECOY TRIALS CD BUT HERE I USE DC
+# CHANGED LATER ON IN FIGURE
+
 # baseline display level should be triangle for model
+# baseline probe level is cd (dc)
+# baseline distance is 2%
 critical_1 <- critical %>%
-  filter(tdd!=0 & probe!="tc") %>%
+  filter(tdd!=0 & probe!="tc") %>% # filter out tc trials
   mutate(tdd=as.factor(tdd),
          probe=factor(probe,levels=c("dc","td"))) %>%
   mutate(display=fct_relevel(display,c("triangle","horizontal")),
-         discrim=case_when(
+         discrim=case_when(# whether or not ppt can discriminate from decoy
            choice=="t" & probe=="td"~1,
-           choice=="c" & probe=="dc"~1,
+           choice=="c" & probe=="dc"~1, 
            choice=="d"~0
          )) %>%
   arrange(sub_n,trial_number)
 
+# Compute mean choice proportions, with CIs
+# Not using this figure in paper
 critical_mean_discrim <- critical_1 %>%
   group_by(sub_n,tdd,probe,display) %>%
   summarise(p_discrim=mean(discrim)) %>%
@@ -115,6 +125,8 @@ critical_mean_discrim %>%
 ggsave(filename=here("analyses","plots","critical_discrim_CIs.jpeg"),width=6,height=5)
 
 # Critical TD trials - Statistical modeling ========================================================================
+# renumbering subject numbers to go sequentially
+# this key specifies which original subject # goes with which new subject #
 subs_key <- tibble(
   sub_n = sort(unique(critical_1$sub_n)),
   sub_n_new = seq(1,n_subs,1)
@@ -132,14 +144,17 @@ critical_for_model <- tibble(
 ) %>%
   left_join(subs_key) %>% ## assigning "new" subject numbers. Just going sequentially from 1-n subs for easier indexing in stan
   relocate(sub_n_new,.after=sub_n)
-critical_unique <- critical_for_model %>%
+critical_unique <- critical_for_model %>% # ALL UNIQUE TRIALS FOR PREDICTION IN MODEL
   distinct(sub_n_new,tdo,display,probe,tdd_5,tdd_9,tdd_14)
+
+# number of unique trials
 n_unique <- nrow(critical_unique)
 
+# data for stan
 stan_data <- list(
-  n_subs=n_subs,
+  n_subs=n_subs, # N
   n_trials=nrow(critical_for_model),
-  sub_n_new=critical_for_model$sub_n_new,
+  sub_n_new=critical_for_model$sub_n_new, 
   tdo=critical_for_model$tdo,
   display=critical_for_model$display,
   probe=critical_for_model$probe,
@@ -158,11 +173,11 @@ stan_data <- list(
 )
 
 # controls
-debug_model <- F
-prefix <- "m6"
-model_dir <- path(here("analyses","stan",prefix))
-stan_model_code <- path(model_dir,glue("{prefix}.stan"))
-fit_file <- path(model_dir,glue("{prefix}_fit.RData"))
+debug_model <- F # whether or not we're testing the model to make sure stan code works
+prefix <- "m7" # which model iteration
+model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
+stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
+fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
 
 
 if(debug_model){
@@ -195,17 +210,21 @@ if(!file_exists(fit_file) | debug_model){
 }
 
 # check modeling ===============================================================================
-# m_fit <- as.matrix(fit)
+check_energy(fit)
+
+
 color_scheme_set("red")
 
 try({
   p <- mcmc_trace(fit,c("lp__"))
+  p
   if(!debug_model) ggsave(p, filename=path(model_dir,glue("{prefix}_lp___trace.jpeg")),width=5,height=4)
   rm(p)
 })
 
 try({
   p <- mcmc_trace(fit,c("b_0"))
+  p
   if(!debug_model) ggsave(p, filename=path(model_dir,glue("{prefix}_b_0_trace.jpeg")),width=5,height=4)
   rm(p)
 })
@@ -408,6 +427,7 @@ try({
 try({
   p <- mcmc_pairs(fit,pars = c("b_0","b_w","b_h","b_td"),
                   off_diag_args = list(size = .5, alpha = 0.5))
+  p
   ggsave(p,filename=path(model_dir,glue("{prefix}_b_pairs_noTDD_fixed.jpeg")),width=10,height=10)
   rm(p)
 })
@@ -415,6 +435,7 @@ try({
 try({
   p <- mcmc_pairs(fit,pars = c("b_tdd_5","b_tdd_9","b_tdd_14","b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"),
                   off_diag_args = list(size = .5, alpha = 0.5))
+  p
   ggsave(p,filename=path(model_dir,glue("{prefix}_b_tdd_pairs_fixed.jpeg")),width=10,height=10)
   rm(p)
 })
@@ -527,6 +548,7 @@ try({
 p <- extract(fit, pars="p")$p
 if(!debug_model) save(p,file=path(model_dir,glue("{prefix}_p.RData")))
 
+# convert p to data frame and clean
 pd <- as.data.frame(t(p))
 colnames(pd) <- paste0("iter_",1:ncol(pd))
 pdd <- bind_cols(critical_unique,pd) %>%
@@ -550,14 +572,15 @@ pdd <- bind_cols(critical_unique,pd) %>%
     probe==0~"dc"
   )) %>%
   group_by(iter,display,probe,tdd) %>%
-  summarise(mp=mean(p)) %>%
+  summarise(mp=mean(p)) %>% # mean predictions across subjects for each iteration
   group_by(display,probe,tdd) %>%
-  summarise(p=mean(mp),
+  summarise(p=mean(mp), # mean predictions, HDI across iterations
             hdi_lower=hdi(mp)[,1],
             hdi_upper=hdi(mp)[,2]) %>%
   ungroup() %>%
   mutate(source="model")
 
+# join to data and clean
 pddd <- critical_1 %>%
   mutate(tdd=as.numeric(as.character(tdd))*100) %>%
   group_by(sub_n,display,probe,tdd) %>%
@@ -566,8 +589,14 @@ pddd <- critical_1 %>%
   summarise(p=mean(p)) %>%
   ungroup() %>%
   mutate(source="data") %>%
-  bind_rows(pdd)
-head(pddd)
+  bind_rows(pdd) %>%
+  mutate(probe=case_when(
+    probe=="dc"~"cd", # IMPORTANT RELABELING DC TO CD
+    T~probe,
+  ),
+  display=factor(display,levels=c("triangle","horizontal"))) # RELEVEL DISPLAY SO TRIANGLE IS ON TOP
+
+# PLOTTING MODEL PREDICTIONS VS. DATA IMPORTANT
 p <- pddd %>%
   ggplot(aes(tdd,p,shape=source,col=probe))+
   geom_point(alpha=.65,size=2.5)+
@@ -578,16 +607,13 @@ p <- pddd %>%
   ggsci::scale_color_startrek(name="comparison")+
   scale_shape_manual(values=c(1,4))+
   # scale_color_manual(values=c("grey","black"))+
-  labs(x="target-decoy distance",y="p(discriminate)")+
+  labs(x="tdd",y="p(correct)")+
   facet_grid(display~.)+
   ggthemes::theme_few()+
   theme(text=element_text(size=18))
 p
 ggsave(p,filename=path(model_dir,glue("{prefix}_model_preds_v_data.jpeg")),
        width=5,height=4,dpi=500)
-  #       plot.title=element_text(hjust=0.5),
-  #       legend.position = "inside",
-  #       legend.position.inside = c(.1,.85))
 
 # check random effect constraints ================================================================================================================================================
 b_0_s <- extract(fit,pars="b_0_s")$b_0_s
