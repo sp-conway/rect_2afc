@@ -93,8 +93,8 @@ model {
   b_tdd_14_X_td~ normal(0,2.5);
   
   // random effects - standard deviations
-  sigma_b_0_s ~ cauchy(0,1);
-  sigma_b_s ~ cauchy(0,.5);
+  sigma_b_0_s ~ cauchy(0,.25);
+  sigma_b_s ~ cauchy(0,.25);
   
   // random effects - coefficients
   b_0_s ~ normal(0,sigma_b_0_s);
