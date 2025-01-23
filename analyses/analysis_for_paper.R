@@ -174,7 +174,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m2" # which model iteration
+prefix <- "m11" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
@@ -203,10 +203,10 @@ if(!file_exists(fit_file) | debug_model){
   if(!debug_model) save(fit,file=fit_file)
   diagnostics <- get_sampler_params(fit)
   if(!debug_model) save(diagnostics, file=path(model_dir,glue("{prefix}_diag.RData")))
-}else{
-  load(fit_file)
   fit_summary <- summary(fit,probs=c(.025,.975))
   if(!debug_model) save(fit_summary, file=path(model_dir,glue("{prefix}_summary.RData")))
+}else{
+  load(fit_file)
 }
 
 # check modeling ===============================================================================
