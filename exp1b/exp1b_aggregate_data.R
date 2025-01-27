@@ -66,7 +66,7 @@ data_all_filtered <- data_all %>%
 n_filtered <- n_subs_all-length(sub_ns_filtered)
 
 glue("filtered out {n_filtered} subjects based on catch performance\nalso filtered out trials with rt <100ms and >10000ms") %>%
-  write_lines(file="exp1b_filtered_subs.txt")
+  write_lines(file=here("analyses","exp1b_filtered_subs.txt"))
 
 # write aggregated data file 
 glue("{data_dir}/aggregated/rect_exp1b_aggregated.csv") %>%
