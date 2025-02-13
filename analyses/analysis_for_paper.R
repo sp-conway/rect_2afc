@@ -174,7 +174,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m11" # which model iteration
+prefix <- "m12" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
@@ -199,7 +199,8 @@ if(!file_exists(fit_file) | debug_model){
                   data=stan_data,
                   chains=n_chain,
                   cores=n_core,
-                  iter=n_iter)
+                  iter=n_iter,
+                  control=list(adapt_delta=.95)) # ONLY DID THIS FOR M11
   if(!debug_model) save(fit,file=fit_file)
   diagnostics <- get_sampler_params(fit)
   if(!debug_model) save(diagnostics, file=path(model_dir,glue("{prefix}_diag.RData")))
@@ -448,7 +449,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_0_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_0_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -457,7 +458,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_h_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_h_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -466,7 +467,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_w_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_w_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -475,7 +476,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_td_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_td_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -484,7 +485,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_5_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_5_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -493,7 +494,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_9_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_9_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -502,7 +503,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_14_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_14_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -511,7 +512,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_5_X_td_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_5_X_td_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -520,7 +521,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_9_X_td_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_9_X_td_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -529,7 +530,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit, regex_pars = "^b_tdd_14_X_td_s",prob=.5,prob_outer = .95)+
+  p <- mcmc_intervals(fit, regex_pars = "^b_tdd_14_X_td_s",prob=.5,prob_outer = .95)+
     theme(axis.text.y = element_blank(),
           axis.ticks.y = element_blank())+
     labs(y="participant",x="estimate")
@@ -538,7 +539,7 @@ try({
 })
 
 try({
-  p <- mcmc_intervals(m_fit,pars=c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14",
+  p <- mcmc_intervals(fit,pars=c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14",
                               "b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"),prob=.5,prob_outer = .95)
   rm(p)
 })
@@ -595,6 +596,7 @@ pddd <- critical_1 %>%
     T~probe,
   ),
   display=factor(display,levels=c("triangle","horizontal"))) # RELEVEL DISPLAY SO TRIANGLE IS ON TOP
+write_csv(pddd, file=path(model_dir,glue("{prefix}_2afc_preds_v_data.csv")))
 
 # PLOTTING MODEL PREDICTIONS VS. DATA IMPORTANT
 p <- pddd %>%
