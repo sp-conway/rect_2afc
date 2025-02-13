@@ -595,6 +595,7 @@ pddd <- critical_1 %>%
     T~probe,
   ),
   display=factor(display,levels=c("triangle","horizontal"))) # RELEVEL DISPLAY SO TRIANGLE IS ON TOP
+write_csv(pddd, file=path(model_dir,"2afc_preds_v_data.csv"))
 
 # PLOTTING MODEL PREDICTIONS VS. DATA IMPORTANT
 p <- pddd %>%
