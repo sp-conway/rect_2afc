@@ -174,7 +174,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m13" # which model iteration
+prefix <- "m14" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
@@ -188,7 +188,7 @@ if(debug_model){
   to_save <- F
 }else{
   # number of iterations for each model per core (for MCMC)
-  n_iter <- 4000
+  n_iter <- 2500
   n_chain <- 5
   n_core <- 10
 }
@@ -200,7 +200,7 @@ if(!file_exists(fit_file) | debug_model){
                   chains=n_chain,
                   cores=n_core,
                   iter=n_iter,
-                  control=list(adapt_delta=.95)) # ONLY DID THIS FOR M11
+                  control=list(adapt_delta=.95)) 
   if(!debug_model) save(fit,file=fit_file)
   diagnostics <- get_sampler_params(fit)
   if(!debug_model) save(diagnostics, file=path(model_dir,glue("{prefix}_diag.RData")))
