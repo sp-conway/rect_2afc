@@ -4,7 +4,7 @@ library(here)
 library(fs)
 library(glue)
 
-n <- 12
+n <- 14
 
 fits <- vector("list",n)
 for(model in 1:n){
@@ -39,6 +39,3 @@ pl(fits_df, "b_w$")
 pl(fits_df,"b_h$")
 pl(fits_df,"b_td$")
 
-sapply(diagnostics,  function(x) mean(x[, "accept_stat__"]))
-sapply(diagnostics,  function(x) mean(x[, "treedepth__"]))
-sapply(diagnostics,  function(x) mean(x[, "divergent__"]))

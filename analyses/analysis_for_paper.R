@@ -650,7 +650,7 @@ b_tdd_14_X_td_s <- extract(fit,pars="b_tdd_14_X_td_s")$b_tdd_14_X_td_s
 hist(rowSums(b_tdd_14_X_td_s))
 # tc trials =================================================================================================================================
 critical_tc_means <- critical %>%
-  filter(probe=="tc") %>%
+  filter(probe=="tc" & tdd!=0) %>%
   mutate(choose_t=choice=="t") %>%
   group_by(sub_n, tdd, display) %>%
   mutate(prop=mean(choose_t)) %>%
@@ -670,16 +670,16 @@ critical_tc_means %>%
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper),width=.75,alpha=.8)+
   geom_hline(yintercept = .5, linetype='dashed',alpha=.25)+
   facet_grid(display~.)+
-  scale_x_continuous(breaks=c(0,2,5,9,14))+
-  scale_y_continuous(limits=c(.33,.66))+
+  scale_x_continuous(breaks=c(2,5,9,14),limits=c(1.5,14.5),labels=c("2%","5%","9%","14%"))+
+  scale_y_continuous(limits=c(.4,.6))+
   ggsci::scale_color_startrek(name="choice")+
-  labs(x="target-decoy distance",y="prop choose target")+
+  labs(y="p(t)")+
   ggthemes::theme_few()+
   theme(text=element_text(size=18),
         plot.title=element_text(hjust=0.5),
         legend.position = "inside",
         legend.position.inside = c(.1,.85))
-ggsave(filename=here("analyses","plots","tc_choices.jpeg"),width=5,height=6)
+ggsave(filename=here("analyses","plots","2afc_tc_choices.jpeg"),width=5,height=6)
 
 # catch analyses ========================================================================================
 # nothing too substantive here, just checking how people did on catch trials

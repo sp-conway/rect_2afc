@@ -12,7 +12,7 @@ data_files <- dir_ls(data_dir,type="file",regexp="csv")
 
 read_data <- function(f){
   print(f)
-  f %>%
+  d <- f %>%
     data.table::fread() %>%
     as_tibble() %>%
     select(-c(success,trial_type,time_elapsed,internal_node_id,timeout,failed_audio,failed_images,failed_video,stimulus,view_history)) %>%
@@ -37,16 +37,25 @@ read_data <- function(f){
     select(-c(trial_index,screen_id,r1yloc,r2yloc,r3yloc)) %>%
     relocate(trial_number,.after=sub_n) %>%
     relocate(response,.before=choice) %>%
-    relocate(rt,.before=response) %>%
-    filter(rt>=100 & rt<=10000) # filter out very fast and very slow rts
+    relocate(rt,.before=response)
+  return(d)
 }
 
 # read in data
 data_all <- map_dfr(data_files,read_data)
 
-n_subs_all <- length(unique(data_all$sub_n))
+data_all_filtered <- data_all %>%
+  filter(rt>=100 & rt<=10000)
 
-catch <- filter(data_all, trial=="catch")
+cat(nrow(filter(data_all,display=="spektor"))-nrow(filter(data_all_filtered,display=="spektor")),"triangle trials removed for slow/fast RTs")
+cat(nrow(filter(data_all,display=="trueblood"))-nrow(filter(data_all_filtered,display=="trueblood")),"horizontal trials removed for slow/fast RTs")
+
+cat(nrow(filter(data_all_filtered,display=="spektor")),"triangle trials remaining")
+cat(nrow(filter(data_all_filtered,display=="trueblood")),"horizontal trials remaining")
+
+n_subs_all <- length(unique(data_all_filtered$sub_n))
+
+catch <- filter(data_all_filtered, trial=="catch")
 
 sub_ns_filtered <- catch %>%
   mutate(correct=case_when(
@@ -60,7 +69,7 @@ sub_ns_filtered <- catch %>%
   filter(prop>=.8) %>%
   pull(sub_n)
 
-data_all_filtered <- data_all %>%
+data_all_filtered_1 <- data_all_filtered %>%
   filter(sub_n %in% sub_ns_filtered) 
 
 n_filtered <- n_subs_all-length(sub_ns_filtered)
@@ -70,6 +79,6 @@ glue("filtered out {n_filtered} subjects based on catch performance\nalso filter
 
 # write aggregated data file 
 glue("{data_dir}/aggregated/rect_exp1b_aggregated.csv") %>%
-  write_csv(data_all_filtered,file=.)
+  write_csv(data_all_filtered_1,file=.)
 
 
