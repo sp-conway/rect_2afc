@@ -649,22 +649,47 @@ hist(rowSums(b_tdd_9_X_td_s))
 b_tdd_14_X_td_s <- extract(fit,pars="b_tdd_14_X_td_s")$b_tdd_14_X_td_s
 hist(rowSums(b_tdd_14_X_td_s))
 # tc trials =================================================================================================================================
-critical_tc_means <- critical %>%
+critical_tc <- critical %>%
+  filter(probe=="tc" & tdd!=0) %>%
+  mutate(choose_t=choice=="t")
+morey_correction <- function(X){
+  J <- length(unique(X$display))*length(unique(X$tdd))
+  corr_factor <- J/(J-1)
+  X %>%
+    group_by(sub_n) %>%
+    mutate(pp=mean(prop)) %>%
+    ungroup() %>%
+    mutate(z=prop-pp+mean(prop)) %>%
+    group_by(tdd,display) %>%
+    summarise(sd=sqrt(var(z)*corr_factor),
+              t=qt(.975,n()-1)*(sd/sqrt(n())),
+              m=mean(prop),
+              ci_lower=m-t,
+              ci_upper=m+t)
+}
+critical_tc <- critical %>%
   filter(probe=="tc" & tdd!=0) %>%
   mutate(choose_t=choice=="t") %>%
-  group_by(sub_n, tdd, display) %>%
-  mutate(prop=mean(choose_t)) %>%
-  ungroup() %>%
-  group_by(tdd, display) %>%
-  summarise(mean_prop=mean(prop),
-            se_prop=sd(prop)/sqrt(n()),
-            ci_lower=mean_prop-qt(.975,n()-1)*se_prop,
-            ci_upper=mean_prop+qt(.975,n()-1)*se_prop) %>%
-  ungroup() %>%
-  mutate(tdd=as.numeric(as.character(tdd))*100)
+  group_by(sub_n,tdd,display) %>%
+  summarise(prop=mean(choose_t)) %>%
+  ungroup()
+critical_tc_means <- critical_tc %>%
+  morey_correction()
+  # 
+  # group_by(sub_n, tdd, display) %>%
+  # mutate(prop=mean(choose_t)) %>%
+  # ungroup() %>%
+  # group_by(tdd, display) %>%
+  # summarise(mean_prop=mean(prop),
+  #           se_prop=sd(prop)/sqrt(n()),
+  #           ci_lower=mean_prop-qt(.975,n()-1)*se_prop,
+  #           ci_upper=mean_prop+qt(.975,n()-1)*se_prop) %>%
+  # ungroup() %>%
+  
 
 critical_tc_means %>%
-  ggplot(aes(tdd, mean_prop))+
+  mutate(tdd=as.numeric(as.character(tdd))*100) %>%
+  ggplot(aes(tdd, m))+
   geom_point(alpha=.8)+
   geom_line(alpha=.8)+
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper),width=.75,alpha=.8)+
@@ -674,12 +699,8 @@ critical_tc_means %>%
   scale_y_continuous(limits=c(.4,.6))+
   ggsci::scale_color_startrek(name="choice")+
   labs(y="p(t)")+
-  ggthemes::theme_few()+
-  theme(text=element_text(size=18),
-        plot.title=element_text(hjust=0.5),
-        legend.position = "inside",
-        legend.position.inside = c(.1,.85))
-ggsave(filename=here("analyses","plots","2afc_tc_choices.jpeg"),width=5,height=6)
+  ggthemes::theme_few()
+ggsave(filename=here("analyses","plots","2afc_tc_choices.jpeg"),width=4,height=5)
 
 # catch analyses ========================================================================================
 # nothing too substantive here, just checking how people did on catch trials
