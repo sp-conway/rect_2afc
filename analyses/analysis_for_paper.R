@@ -101,7 +101,8 @@ critical_mean_discrim <- critical_1 %>%
   summarise(p_discrim=mean(discrim)) %>%
   group_by(tdd, probe, display) %>%
   summarise(mean_discrim=mean(p_discrim),
-            se=sd(p_discrim)/sqrt(n()),
+            sd=sd(p_discrim)
+            se=sd/sqrt(n()),
             ci_lower=mean_discrim-qt(.975,n()-1)*se,
             ci_upper=mean_discrim+qt(.975,n()-1)*se) %>%
   ungroup() %>%
@@ -599,23 +600,27 @@ pddd <- critical_1 %>%
 write_csv(pddd, file=path(model_dir,glue("{prefix}_2afc_preds_v_data.csv")))
 
 # PLOTTING MODEL PREDICTIONS VS. DATA IMPORTANT
-p <- pddd %>%
+pl <- pddd %>%
   ggplot(aes(tdd,p,shape=source,col=probe))+
   geom_point(alpha=.65,size=2.5)+
   geom_line(data = filter(pddd, source == "data"), aes(tdd, p, group = probe), alpha = 0.8) +  
   geom_errorbar(aes(ymin=hdi_lower,ymax=hdi_upper),width=.25,alpha=.5,col="black")+
   scale_x_continuous(breaks=c(2,5,9,14),limits=c(1.5,14.5),labels=c("2%","5%","9%","14%"))+
   scale_y_continuous(limits=c(.5,1))+
-  ggsci::scale_color_startrek(name="comparison")+
-  scale_shape_manual(values=c(1,4))+
-  # scale_color_manual(values=c("grey","black"))+
+  ggsci::scale_color_startrek(name="")+
+  scale_shape_manual(values=c(1,4),name="")+
   labs(x="tdd",y="p(correct)")+
   facet_grid(display~.)+
   ggthemes::theme_few()+
-  theme(text=element_text(size=18))
-p
-ggsave(p,filename=path(model_dir,glue("{prefix}_model_preds_v_data.jpeg")),
-       width=5,height=4,dpi=500)
+  theme(text=element_text(size=10),
+        legend.position="inside",
+        legend.position.inside = c(.1,.83),
+        legend.spacing.y = unit(0.0005, "cm"),  
+        legend.box.spacing = unit(0.00001, "cm"),
+        legend.key.size = unit(.05, units = "cm"))
+pl
+ggsave(pl,filename=path(model_dir,glue("{prefix}_model_preds_v_data.jpeg")),
+       width=5,height=4)
 
 # check random effect constraints ================================================================================================================================================
 b_0_s <- extract(fit,pars="b_0_s")$b_0_s
@@ -745,3 +750,6 @@ catch %>%
 # }else{
 #   load(fit_file)
 # }
+
+# checking some numbers ================================================================================
+critical_mean_discrim
