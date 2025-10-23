@@ -101,7 +101,7 @@ critical_mean_discrim <- critical_1 %>%
   summarise(p_discrim=mean(discrim)) %>%
   group_by(tdd, probe, display) %>%
   summarise(mean_discrim=mean(p_discrim),
-            sd=sd(p_discrim)
+            sd=sd(p_discrim),
             se=sd/sqrt(n()),
             ci_lower=mean_discrim-qt(.975,n()-1)*se,
             ci_upper=mean_discrim+qt(.975,n()-1)*se) %>%
@@ -612,7 +612,9 @@ pl <- pddd %>%
   labs(x="tdd",y="p(correct)")+
   facet_grid(display~.)+
   ggthemes::theme_few()+
-  theme(text=element_text(size=10),
+  theme(axis.text=element_text(size=18),
+        axis.title = element_text(size=18),
+        legend.text=element_text(size=10),
         legend.position="inside",
         legend.position.inside = c(.1,.83),
         legend.spacing.y = unit(0.0005, "cm"),  
@@ -752,4 +754,6 @@ catch %>%
 # }
 
 # checking some numbers ================================================================================
-critical_mean_discrim
+critical_mean_discrim %>% 
+  filter(tdd=="14")
+
