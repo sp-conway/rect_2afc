@@ -614,7 +614,8 @@ pl <- pddd %>%
   ggthemes::theme_few()+
   theme(axis.text=element_text(size=18),
         axis.title = element_text(size=18),
-        legend.text=element_text(size=10),
+        legend.text=element_text(size=8),
+        strip.text=element_text(size=18),
         legend.position="inside",
         legend.position.inside = c(.1,.83),
         legend.spacing.y = unit(0.0005, "cm"),  
@@ -622,7 +623,7 @@ pl <- pddd %>%
         legend.key.size = unit(.05, units = "cm"))
 pl
 ggsave(pl,filename=path(model_dir,glue("{prefix}_model_preds_v_data.jpeg")),
-       width=5,height=4)
+       width=5,height=5)
 
 # check random effect constraints ================================================================================================================================================
 b_0_s <- extract(fit,pars="b_0_s")$b_0_s
