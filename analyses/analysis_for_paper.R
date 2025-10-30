@@ -10,7 +10,7 @@ library(posterior)
 library(bayesplot)
 library(here)
 library(patchwork)
-options(digits=5)
+options(digits=8)
 
 read_dat <- function(f){
   dd <- read_csv(f) %>%
@@ -610,7 +610,7 @@ pl <- pddd %>%
   ggsci::scale_color_startrek(name="")+
   scale_shape_manual(values=c(1,4),name="")+
   labs(x="tdd",y="p(correct)")+
-  facet_grid(display~.)+
+  facet_grid(.~display)+
   ggthemes::theme_few()+
   theme(axis.text=element_text(size=18),
         axis.title = element_text(size=18),
@@ -702,13 +702,14 @@ critical_tc_means %>%
   geom_line(alpha=.8)+
   geom_errorbar(aes(ymin=ci_lower,ymax=ci_upper),width=.75,alpha=.8)+
   geom_hline(yintercept = .5, linetype='dashed',alpha=.25)+
-  facet_grid(display~.)+
+  facet_grid(.~display)+
   scale_x_continuous(breaks=c(2,5,9,14),limits=c(1.5,14.5),labels=c("2%","5%","9%","14%"))+
   scale_y_continuous(limits=c(.4,.6))+
   ggsci::scale_color_startrek(name="choice")+
-  labs(y="p(t)")+
-  ggthemes::theme_few()
-ggsave(filename=here("analyses","plots","2afc_tc_choices.jpeg"),width=4,height=5)
+  labs(x="TDD",y="p(t)")+
+  ggthemes::theme_few()+
+  theme(text=element_text(size=16))
+ggsave(filename=here("analyses","plots","2afc_tc_choices.jpeg"),width=6,height=3)
 
 # catch analyses ========================================================================================
 # nothing too substantive here, just checking how people did on catch trials
@@ -733,10 +734,10 @@ catch %>%
 
 catch %>%
   group_by(sub_n,display) %>%
-  summarise(correct=mean(correct)) %>%
+  summarise(correct=mean(correct)*100) %>%
   ungroup() %>%
   summarise(m_correct=mean(correct),
-            s_correct=sd(correct),.by = display)
+            s_correct=sd(correct),.by = display) 
 
 
 
@@ -758,3 +759,4 @@ catch %>%
 critical_mean_discrim %>% 
   filter(tdd=="14")
 
+fit_summary$summary[1:10,c(1,3,4,5)]
