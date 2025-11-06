@@ -175,7 +175,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m14" # which model iteration
+prefix <- "m15" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
