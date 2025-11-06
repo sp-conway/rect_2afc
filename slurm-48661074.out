@@ -1,0 +1,303 @@
+Loading r-rocker-ml-verse version 4.4.0+apptainer
+Loading apptainer version latest
+
+No apptainer cache directory found. To prevent apptainer from filling up your
+home directory, you can create a new directory at
+`/work/pi_<your_pi_name>/.apptainer/cache` and reload the module. 
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+Loading required package: StanHeaders
+
+rstan version 2.32.6 (Stan version 2.32.2)
+
+For execution on a local, multicore CPU with excess RAM we recommend calling
+options(mc.cores = parallel::detectCores()).
+To avoid recompilation of unchanged Stan programs, we recommend calling
+rstan_options(auto_write = TRUE)
+For within-chain threading using `reduce_sum()` or `map_rect()` Stan functions,
+change `threads_per_chain` option:
+rstan_options(threads_per_chain = 1)
+
+
+Attaching package: ‘rstan’
+
+The following object is masked from ‘package:tidyr’:
+
+    extract
+
+This is posterior version 1.6.0
+
+Attaching package: ‘posterior’
+
+The following objects are masked from ‘package:rstan’:
+
+    ess_bulk, ess_tail
+
+The following objects are masked from ‘package:stats’:
+
+    mad, sd, var
+
+The following objects are masked from ‘package:base’:
+
+    %in%, match
+
+This is bayesplot version 1.11.1
+- Online documentation and vignettes at mc-stan.org/bayesplot
+- bayesplot theme set to bayesplot::theme_default()
+   * Does _not_ affect other ggplot2 plots
+   * See ?bayesplot_theme_set for details on theme setting
+
+Attaching package: ‘bayesplot’
+
+The following object is masked from ‘package:posterior’:
+
+    rhat
+
+here() starts at /work/pi_alc_umass_edu/spconway/scratch/rect_2afc
+Rows: 35741 Columns: 35
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr  (9): trial, r1, r2, r3, display, tdo, probe, probe_rects, choice
+dbl (26): sub_n, trial_number, w1, h1, w2, h2, w3, h3, tdd, tw, th, cw, ch, ...
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+[1] 85
+`summarise()` has grouped output by 'sub_n', 'tdd', 'probe'. You can override
+using the `.groups` argument.
+`summarise()` has grouped output by 'tdd', 'probe'. You can override using the
+`.groups` argument.
+# A tibble: 30 × 9
+   tdd   probe choice     m     s     N     se ci_lower ci_upper
+   <fct> <fct> <fct>  <dbl> <dbl> <int>  <dbl>    <dbl>    <dbl>
+ 1 0     dc    c      0.498 0.113    85 0.0123    0.474    0.522
+ 2 0     dc    d      0.502 0.113    85 0.0123    0.478    0.526
+ 3 0     tc    c      0.510 0.102    85 0.0110    0.488    0.532
+ 4 0     tc    t      0.490 0.102    85 0.0110    0.468    0.512
+ 5 0     td    d      0.505 0.121    85 0.0131    0.479    0.531
+ 6 0     td    t      0.495 0.121    85 0.0131    0.469    0.521
+ 7 0.02  dc    c      0.565 0.109    85 0.0118    0.542    0.589
+ 8 0.02  dc    d      0.435 0.109    85 0.0118    0.411    0.458
+ 9 0.02  tc    c      0.523 0.103    85 0.0112    0.500    0.545
+10 0.02  tc    t      0.477 0.103    85 0.0112    0.455    0.500
+# ℹ 20 more rows
+`summarise()` has grouped output by 'sub_n', 'tdd', 'probe'. You can override
+using the `.groups` argument.
+`summarise()` has grouped output by 'tdd', 'probe'. You can override using the
+`.groups` argument.
+Joining with `by = join_by(sub_n)`
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 1).
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 2).
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 3).
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 4).
+
+SAMPLING FOR MODEL 'anon_model' NOW (CHAIN 5).
+Chain 2: 
+Chain 2: Gradient evaluation took 0.022553 seconds
+Chain 2: 1000 transitions using 10 leapfrog steps per transition would take 225.53 seconds.
+Chain 2: Adjust your expectations accordingly!
+Chain 2: 
+Chain 2: 
+Chain 1: 
+Chain 1: Gradient evaluation took 0.022831 seconds
+Chain 1: 1000 transitions using 10 leapfrog steps per transition would take 228.31 seconds.
+Chain 1: Adjust your expectations accordingly!
+Chain 1: 
+Chain 1: 
+Chain 4: 
+Chain 4: Gradient evaluation took 0.021459 seconds
+Chain 4: 1000 transitions using 10 leapfrog steps per transition would take 214.59 seconds.
+Chain 4: Adjust your expectations accordingly!
+Chain 4: 
+Chain 4: 
+Chain 3: 
+Chain 3: Gradient evaluation took 0.02163 seconds
+Chain 3: 1000 transitions using 10 leapfrog steps per transition would take 216.3 seconds.
+Chain 3: Adjust your expectations accordingly!
+Chain 3: 
+Chain 3: 
+Chain 5: 
+Chain 5: Gradient evaluation took 0.021871 seconds
+Chain 5: 1000 transitions using 10 leapfrog steps per transition would take 218.71 seconds.
+Chain 5: Adjust your expectations accordingly!
+Chain 5: 
+Chain 5: 
+Chain 2: Iteration:    1 / 2500 [  0%]  (Warmup)
+Chain 1: Iteration:    1 / 2500 [  0%]  (Warmup)
+Chain 4: Iteration:    1 / 2500 [  0%]  (Warmup)
+Chain 3: Iteration:    1 / 2500 [  0%]  (Warmup)
+Chain 5: Iteration:    1 / 2500 [  0%]  (Warmup)
+Chain 4: Iteration:  250 / 2500 [ 10%]  (Warmup)
+Chain 3: Iteration:  250 / 2500 [ 10%]  (Warmup)
+Chain 2: Iteration:  250 / 2500 [ 10%]  (Warmup)
+Chain 5: Iteration:  250 / 2500 [ 10%]  (Warmup)
+Chain 1: Iteration:  250 / 2500 [ 10%]  (Warmup)
+Chain 4: Iteration:  500 / 2500 [ 20%]  (Warmup)
+Chain 3: Iteration:  500 / 2500 [ 20%]  (Warmup)
+Chain 2: Iteration:  500 / 2500 [ 20%]  (Warmup)
+Chain 5: Iteration:  500 / 2500 [ 20%]  (Warmup)
+Chain 4: Iteration:  750 / 2500 [ 30%]  (Warmup)
+Chain 2: Iteration:  750 / 2500 [ 30%]  (Warmup)
+Chain 3: Iteration:  750 / 2500 [ 30%]  (Warmup)
+Chain 5: Iteration:  750 / 2500 [ 30%]  (Warmup)
+Chain 4: Iteration: 1000 / 2500 [ 40%]  (Warmup)
+Chain 1: Iteration:  500 / 2500 [ 20%]  (Warmup)
+Chain 3: Iteration: 1000 / 2500 [ 40%]  (Warmup)
+Chain 2: Iteration: 1000 / 2500 [ 40%]  (Warmup)
+Chain 5: Iteration: 1000 / 2500 [ 40%]  (Warmup)
+Chain 4: Iteration: 1250 / 2500 [ 50%]  (Warmup)
+Chain 4: Iteration: 1251 / 2500 [ 50%]  (Sampling)
+Chain 5: Iteration: 1250 / 2500 [ 50%]  (Warmup)
+Chain 5: Iteration: 1251 / 2500 [ 50%]  (Sampling)
+Chain 1: Iteration:  750 / 2500 [ 30%]  (Warmup)
+Chain 2: Iteration: 1250 / 2500 [ 50%]  (Warmup)
+Chain 2: Iteration: 1251 / 2500 [ 50%]  (Sampling)
+Chain 4: Iteration: 1500 / 2500 [ 60%]  (Sampling)
+Chain 5: Iteration: 1500 / 2500 [ 60%]  (Sampling)
+Chain 2: Iteration: 1500 / 2500 [ 60%]  (Sampling)
+Chain 1: Iteration: 1000 / 2500 [ 40%]  (Warmup)
+Chain 5: Iteration: 1750 / 2500 [ 70%]  (Sampling)
+Chain 4: Iteration: 1750 / 2500 [ 70%]  (Sampling)
+Chain 5: Iteration: 2000 / 2500 [ 80%]  (Sampling)
+Chain 2: Iteration: 1750 / 2500 [ 70%]  (Sampling)
+Chain 3: Iteration: 1250 / 2500 [ 50%]  (Warmup)
+Chain 3: Iteration: 1251 / 2500 [ 50%]  (Sampling)
+Chain 4: Iteration: 2000 / 2500 [ 80%]  (Sampling)
+Chain 5: Iteration: 2250 / 2500 [ 90%]  (Sampling)
+Chain 2: Iteration: 2000 / 2500 [ 80%]  (Sampling)
+Chain 5: Iteration: 2500 / 2500 [100%]  (Sampling)
+Chain 5: 
+Chain 5:  Elapsed Time: 959.066 seconds (Warm-up)
+Chain 5:                630.207 seconds (Sampling)
+Chain 5:                1589.27 seconds (Total)
+Chain 5: 
+Chain 4: Iteration: 2250 / 2500 [ 90%]  (Sampling)
+Chain 3: Iteration: 1500 / 2500 [ 60%]  (Sampling)
+Chain 2: Iteration: 2250 / 2500 [ 90%]  (Sampling)
+Chain 4: Iteration: 2500 / 2500 [100%]  (Sampling)
+Chain 4: 
+Chain 4:  Elapsed Time: 889.852 seconds (Warm-up)
+Chain 4:                877.989 seconds (Sampling)
+Chain 4:                1767.84 seconds (Total)
+Chain 4: 
+Chain 1: Iteration: 1250 / 2500 [ 50%]  (Warmup)
+Chain 1: Iteration: 1251 / 2500 [ 50%]  (Sampling)
+Chain 2: Iteration: 2500 / 2500 [100%]  (Sampling)
+Chain 2: 
+Chain 2:  Elapsed Time: 995.453 seconds (Warm-up)
+Chain 2:                887.118 seconds (Sampling)
+Chain 2:                1882.57 seconds (Total)
+Chain 2: 
+Chain 1: Iteration: 1500 / 2500 [ 60%]  (Sampling)
+Chain 3: Iteration: 1750 / 2500 [ 70%]  (Sampling)
+Chain 1: Iteration: 1750 / 2500 [ 70%]  (Sampling)
+Chain 1: Iteration: 2000 / 2500 [ 80%]  (Sampling)
+Chain 3: Iteration: 2000 / 2500 [ 80%]  (Sampling)
+Chain 1: Iteration: 2250 / 2500 [ 90%]  (Sampling)
+Chain 1: Iteration: 2500 / 2500 [100%]  (Sampling)
+Chain 1: 
+Chain 1:  Elapsed Time: 1772.42 seconds (Warm-up)
+Chain 1:                961.799 seconds (Sampling)
+Chain 1:                2734.22 seconds (Total)
+Chain 1: 
+Chain 3: Iteration: 2250 / 2500 [ 90%]  (Sampling)
+Chain 3: Iteration: 2500 / 2500 [100%]  (Sampling)
+Chain 3: 
+Chain 3:  Elapsed Time: 1354.34 seconds (Warm-up)
+Chain 3:                1740.54 seconds (Sampling)
+Chain 3:                3094.87 seconds (Total)
+Chain 3: 
+Warning messages:
+1: There were 5 chains where the estimated Bayesian Fraction of Missing Information was low. See
+https://mc-stan.org/misc/warnings.html#bfmi-low 
+2: Examine the pairs() plot to diagnose sampling problems
+ 
+3: The largest R-hat is 1.14, indicating chains have not mixed.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#r-hat 
+4: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#bulk-ess 
+5: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
+Running the chains for more iterations may help. See
+https://mc-stan.org/misc/warnings.html#tail-ess 
+E-BFMI indicated possible pathological behavior:
+  Chain 1: E-BFMI = 0.129
+  Chain 2: E-BFMI = 0.191
+  Chain 3: E-BFMI = 0.163
+  Chain 4: E-BFMI = 0.151
+  Chain 5: E-BFMI = 0.117
+E-BFMI below 0.2 indicates you may need to reparameterize your model.
+Error in select_parameters(complete_pars = parameter_names(x), explicit = pars,  : 
+  Some 'pars' don't match parameter names: sigma_b_s FALSE
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+Error in select_parameters(complete_pars = parameter_names(x), explicit = pars,  : 
+  Some 'pars' don't match parameter names: sigma_b_s FALSE
+Error in select_parameters(complete_pars = parameter_names(x), explicit = pars,  : 
+  Some 'pars' don't match parameter names: sigma_b_s FALSE
+Error in select_parameters(complete_pars = parameter_names(x), explicit = pars,  : 
+  Some 'pars' don't match parameter names: sigma_b_s FALSE
+`summarise()` has grouped output by 'iter', 'display', 'probe'. You can
+override using the `.groups` argument.
+`summarise()` has grouped output by 'display', 'probe'. You can override using
+the `.groups` argument.
+`summarise()` has grouped output by 'sub_n', 'display', 'probe'. You can
+override using the `.groups` argument.
+`summarise()` has grouped output by 'display', 'probe'. You can override using
+the `.groups` argument.
+[1] -0.04733273
+`summarise()` has grouped output by 'sub_n', 'tdd'. You can override using the
+`.groups` argument.
+`summarise()` has grouped output by 'tdd'. You can override using the `.groups`
+argument.
+`summarise()` has grouped output by 'sub_n'. You can override using the
+`.groups` argument.
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+# A tibble: 2 × 2
+  display    correct_prop
+  <fct>             <dbl>
+1 triangle          0.926
+2 horizontal        0.932
+`summarise()` has grouped output by 'sub_n'. You can override using the
+`.groups` argument.
+# A tibble: 2 × 3
+  display    m_correct s_correct
+  <fct>          <dbl>     <dbl>
+1 triangle        92.6      3.77
+2 horizontal      93.2      3.52
+# A tibble: 4 × 8
+    tdd probe display    mean_discrim     sd      se ci_lower ci_upper
+  <dbl> <fct> <fct>             <dbl>  <dbl>   <dbl>    <dbl>    <dbl>
+1    14 dc    triangle          0.821 0.130  0.0142     0.792    0.849
+2    14 dc    horizontal        0.845 0.118  0.0128     0.819    0.871
+3    14 td    triangle          0.895 0.109  0.0118     0.872    0.918
+4    14 td    horizontal        0.951 0.0777 0.00843    0.935    0.968
+                     mean          sd         2.5%       97.5%
+b_0            0.44158739 0.065629570  0.311911648  0.57040475
+b_w           -0.54537527 0.079218529 -0.705718136 -0.39240976
+b_h            0.23361177 0.051639050  0.132037640  0.33450540
+b_td           0.18117702 0.084771230  0.016707138  0.35121294
+b_tdd_5        0.39573750 0.079926764  0.242256939  0.55383913
+b_tdd_9        0.82425151 0.087867049  0.651478620  0.99680624
+b_tdd_14       1.48117900 0.100836887  1.281216043  1.68586335
+b_tdd_5_X_td   0.14102464 0.117031540 -0.083102053  0.36879726
+b_tdd_9_X_td   0.64502387 0.136701357  0.387767034  0.91330717
+b_tdd_14_X_td  0.78641955 0.151457862  0.494255784  1.09226598

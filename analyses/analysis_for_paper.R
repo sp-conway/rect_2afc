@@ -175,7 +175,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m15" # which model iteration
+prefix <- "m16" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
@@ -262,7 +262,13 @@ try({
 })
 
 try({
-  p <- mcmc_trace(fit,c("sigma_b_0_s","sigma_b_s"))
+  p <- mcmc_trace(fit,c("b_h_X_td"))
+  if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_b_h_X_td_trace.jpeg")),width=5,height=4)
+  rm(p)
+})
+
+try({
+  p <- mcmc_trace(fit,regex_pars="sigma")
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_sigma_trace.jpeg")),width=7,height=6)
   rm(p)
 })
@@ -355,6 +361,12 @@ try({
 try({
   p <- mcmc_dens(fit,c("b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"))
   if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_b_tdd_X_td_dens.jpeg")),width=5,height=4)
+  rm(p)
+})
+
+try({
+  p <- mcmc_dens(fit,c("b_h_X_td"))
+  if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_b_h_X_td_dens.jpeg")),width=5,height=4)
   rm(p)
 })
 
@@ -540,8 +552,15 @@ try({
 })
 
 try({
+  p <- mcmc_intervals(fit,c("b_h_X_td"))
+  if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_b_h_X_td_int.jpeg")),width=5,height=4)
+  rm(p)
+})
+
+try({
   p <- mcmc_intervals(fit,pars=c("b_0","b_w","b_h","b_td","b_tdd_5","b_tdd_9","b_tdd_14",
-                              "b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td"),prob=.5,prob_outer = .95)
+                              "b_tdd_5_X_td","b_tdd_9_X_td","b_tdd_14_X_td","b_h_X_td"),prob=.5,prob_outer = .95)
+  if(!debug_model) ggsave(p,filename=path(model_dir,glue("{prefix}_b_fixed_all_int.jpeg")),width=5,height=4)
   rm(p)
 })
 

@@ -8,7 +8,7 @@ data {
   vector[n_trials] probe; // probe. 1=target-decoy, 0=competitor-decoy
   vector[n_trials] tdd_5; // dummy variable for target-decoy distance=5
   vector[n_trials] tdd_9; // dummy variable for target-decoy distance=9
-  vector[n_trials] tdd_14; // dummy variable for target-decoy distance=14
+  vector[n_trials] tdd_14; //dummy variable for target-decoy distance=14
   array[n_trials] int discrim; // whether participant discriminates, i.e., does not choose decoy
   
   // unique trials for prediction
@@ -18,7 +18,7 @@ data {
   vector[n_trials_unique] probe_unique; // probe. 1=target-decoy, 0=competitor-decoy
   vector[n_trials_unique] tdd_5_unique; // dummy variable for target-decoy distance=5
   vector[n_trials_unique] tdd_9_unique; // dummy variable for target-decoy distance=9
-  vector[n_trials_unique] tdd_14_unique; // dummy variable for target-decoy distance=5
+  vector[n_trials_unique] tdd_14_unique; // dummy variable for target-decoy distance=14
 }
 
 parameters {
@@ -44,6 +44,9 @@ parameters {
   real b_tdd_5_X_td;
   real b_tdd_9_X_td;
   real b_tdd_14_X_td;
+  
+  // fixed interaction between display and probe
+  real b_h_X_td;
   
   // random subject-level intercepts
   vector[n_subs] b_0_s;
@@ -78,6 +81,9 @@ parameters {
   // std dev of effect of tdd14 x td
   real<lower=0> sigma_btdd14xtd_s;
   
+  // std dev of effect of horizontal x td
+  real<lower=0> sigma_b_h_X_td_s;
+  
   // random effect of wide
   vector[n_subs] b_w_s;
   
@@ -101,6 +107,9 @@ parameters {
   vector[n_subs] b_tdd_9_X_td_s;
   vector[n_subs] b_tdd_14_X_td_s;
   
+  // random interaction between td and display
+  vector[n_subs] b_h_X_td_s;
+  
 }
 
 model {
@@ -115,6 +124,7 @@ model {
   b_tdd_5_X_td ~ normal(0,2.5);
   b_tdd_9_X_td ~ normal(0,2.5);
   b_tdd_14_X_td~ normal(0,2.5);
+  b_h_X_td ~ normal(0,2.5);
   
   // random effects - standard deviations
   sigma_b_0_s ~ lognormal(0,.5);
@@ -126,7 +136,8 @@ model {
   sigma_btdd14_s ~ lognormal(0,.5);
   sigma_btdd5xtd_s ~ lognormal(0,.5);
   sigma_btdd9xtd_s ~ lognormal(0,.5);
-  sigma_btdd14_s ~ lognormal(0,.5);  
+  sigma_btdd14xtd_s ~ lognormal(0,.5);  
+  sigma_b_h_X_td_s ~ lognormal(0,.5);
   
   // random effects - coefficients
   b_0_s ~ normal(0,sigma_b_0_s);
@@ -139,7 +150,8 @@ model {
   b_tdd_5_X_td_s ~ normal(0,sigma_btdd5xtd_s);
   b_tdd_9_X_td_s ~ normal(0,sigma_btdd9xtd_s);
   b_tdd_14_X_td_s ~ normal(0,sigma_btdd14xtd_s);
-
+  b_h_X_td_s ~ normal(0,sigma_b_h_X_td_s);
+  
   for(i in 1:n_trials) {
     discrim[i] ~ bernoulli_logit( 
       (b_0 + b_0_s[sub_n_new[i]]) +  // intercept
@@ -151,7 +163,8 @@ model {
       (b_tdd_14 + b_tdd_14_s[sub_n_new[i]]) * tdd_14[i] + // effect of tdd=14
       (b_tdd_5_X_td + b_tdd_5_X_td_s[sub_n_new[i]]) * tdd_5[i] * probe[i] +  // effect of tdd=5 & probe=td
       (b_tdd_9_X_td + b_tdd_9_X_td_s[sub_n_new[i]]) * tdd_9[i] * probe[i] + // effect of tdd=9 & probe=td
-      (b_tdd_14_X_td + b_tdd_14_X_td_s[sub_n_new[i]]) * tdd_14[i] * probe[i]  // effect of tdd=14 & probe=td
+      (b_tdd_14_X_td + b_tdd_14_X_td_s[sub_n_new[i]]) * tdd_14[i] * probe[i] + // effect of tdd=14 & probe=td
+      (b_h_X_td + b_h_X_td_s[sub_n_new[i]]) * probe[i] * display[i] // interaction between horiz. display and td probe
   );
 }
 
@@ -170,6 +183,7 @@ generated quantities{
                      (b_tdd_14+b_tdd_14_s[sub_n_new_unique[i]])*tdd_14_unique[i] + // effect of tdd=14
                      (b_tdd_5_X_td + b_tdd_5_X_td_s[sub_n_new_unique[i]])*tdd_5_unique[i]*probe_unique[i] +  // effect of tdd=5 & probe=td
                      (b_tdd_9_X_td + b_tdd_9_X_td_s[sub_n_new_unique[i]])*tdd_9_unique[i]*probe_unique[i] + // effect of tdd=9 & probe=td
-                     (b_tdd_14_X_td + b_tdd_14_X_td_s[sub_n_new_unique[i]])*tdd_14_unique[i]*probe_unique[i] );
+                     (b_tdd_14_X_td + b_tdd_14_X_td_s[sub_n_new_unique[i]])*tdd_14_unique[i]*probe_unique[i]  + 
+                     (b_h_X_td + b_h_X_td_s[sub_n_new_unique[i]]) * probe_unique[i] * display_unique[i]);
   }
 }
