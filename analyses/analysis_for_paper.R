@@ -175,7 +175,7 @@ stan_data <- list(
 
 # controls
 debug_model <- F # whether or not we're testing the model to make sure stan code works
-prefix <- "m17" # which model iteration
+prefix <- "m14" # which model iteration
 model_dir <- path(here("analyses","stan",prefix)) # stan files / save directory
 stan_model_code <- path(model_dir,glue("{prefix}.stan")) # model code
 fit_file <- path(model_dir,glue("{prefix}_fit.RData")) # name of our resulting fit object
@@ -590,7 +590,7 @@ if(!debug_model) save(p,file=path(model_dir,glue("{prefix}_p.RData")))
 # convert p to data frame and clean
 pd <- as.data.frame(t(p))
 colnames(pd) <- paste0("iter_",1:ncol(pd))
-pdd <- bind_cols(critical_unique,pd) %>%
+pd1 <- bind_cols(critical_unique,pd) %>%
   pivot_longer(cols=contains("iter"),values_to = "p",names_to = "iter") %>%
   mutate(tdd=case_when(
     tdd_5==1~5,
@@ -609,7 +609,10 @@ pdd <- bind_cols(critical_unique,pd) %>%
   probe=case_when(
     probe==1~"td",
     probe==0~"dc"
-  )) %>%
+  ))
+
+# group level predictions ============================================================
+pdd <- pd1 %>%
   group_by(iter,display,probe,tdd) %>%
   summarise(mp=mean(p)) %>% # mean predictions across subjects for each iteration
   group_by(display,probe,tdd) %>%
@@ -638,14 +641,15 @@ write_csv(pddd, file=path(model_dir,glue("{prefix}_2afc_preds_v_data.csv")))
 
 # PLOTTING MODEL PREDICTIONS VS. DATA IMPORTANT
 pl <- pddd %>%
-  ggplot(aes(tdd,p,shape=source,col=probe))+
-  geom_point(alpha=.65,size=2.5)+
+  ggplot(aes(tdd,p,shape=source,col=probe,linetype=probe))+
+  geom_point(alpha=.65,size=1.75)+
   geom_line(data = filter(pddd, source == "data"), aes(tdd, p, group = probe), alpha = 0.8) +  
   geom_errorbar(aes(ymin=hdi_lower,ymax=hdi_upper),width=.25,alpha=.5,col="black")+
   scale_x_continuous(breaks=c(2,5,9,14),limits=c(1.5,14.5),labels=c("2%","5%","9%","14%"))+
   scale_y_continuous(limits=c(.5,1))+
   ggsci::scale_color_startrek(name="")+
   scale_shape_manual(values=c(1,4),name="")+
+  scale_linetype_discrete(name="")+
   labs(x="tdd",y="p(correct)")+
   facet_grid(.~display)+
   ggthemes::theme_few()+
